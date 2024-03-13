@@ -7,21 +7,21 @@ vbs <- list(
     title = "Total number of visits",
     value = "292,234",
     showcase = bs_icon("hospital-fill"),
-    style = "background-color: #3C5C45!important; color: #FFFFFF!important",
+    style = "background-color: #3C3E5C!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
     title = "Total number of patients",
     value = "11,737",
     showcase = bs_icon("person-vcard-fill"),
-    style = "background-color: #5C3C3C  !important; color: #FFFFFF!important",
+    style = "background-color: #5C3C4F!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
     title = "Total number of conditions",
     value = "89",
     showcase = bs_icon("clipboard2-pulse-fill"),
-    style = "background-color: #5C4E3C!important; color: #FFFFFF!important",
+    style = "background-color: #3C4F5C!important; color: #FFFFFF!important",
     max_height = "150px"
   )
 )
@@ -42,7 +42,7 @@ cards <- list(
 
 ui <- page_navbar(
   theme = bslib::bs_theme(
-    fg = "#3B5B44",
+    fg = "#3C3E5C",
     font_scale = NULL,
     preset = "lumen",
     bg = "#fff",
@@ -101,14 +101,14 @@ ui <- page_navbar(
             )),
   nav_spacer(),
   nav_item(
-    tags$a(icon("github"), href = "https://github.com/posit-marketing/healthcare-app", target = "_blank"),
+    tags$a(icon("github"), href = "https://github.com/posit-marketing/visit-diagnoses-browser", target = "_blank"),
     align = "right"
   ),
   footer =
     tags$div(
       style = "background-color: #FFFFFF; padding: 0px; text-align: center; bottom: 0; width: 100%;",
       HTML(
-        "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://www.databricks.com/blog/databricks-and-posit-announce-new-integrations' target='_blank'>blog post</a> announcing the partnership."
+        "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://posit.co/blog/databricks-and-posit-announce-new-integrations/' target='_blank'>blog post</a> announcing the partnership."
       )
     )
 )
@@ -126,7 +126,7 @@ server <- function(input, output) {
     selected_encounters_distinct |>
       ggplot(aes(x = reorder(REASONDESCRIPTION, n), y = n)) +
       geom_bar(stat = "identity",
-               fill = "#9E90B1",
+               fill = "#363953",
                color = "white") +
       labs(x = "Reason Description", y = "Count") +
       theme_minimal() +
@@ -188,8 +188,8 @@ server <- function(input, output) {
       scale_fill_manual(
         labels = c("0" = paste0("No ", input$select_comorbidity),
                    "1" = input$select_comorbidity),
-        values = c("0" = "#5F5370",
-                   "1" = "#B0AF8F")
+        values = c("0" = "#555982",
+                   "1" = "#DBC28F")
       ) +
       coord_flip()
     
