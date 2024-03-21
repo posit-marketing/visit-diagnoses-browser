@@ -7,201 +7,187 @@ vbs <- list(
     title = "Total number of visits",
     value = "292,234",
     showcase = bs_icon("hospital-fill"),
-    style = "background-color: #3C3E5C!important; color: #FFFFFF!important",
+    style = "background-color: #082D46!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
     title = "Total number of patients",
     value = "11,737",
     showcase = bs_icon("person-vcard-fill"),
-    style = "background-color: #5C3C4F!important; color: #FFFFFF!important",
+    style = "background-color: #A45445!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
     title = "Total number of conditions",
     value = "89",
     showcase = bs_icon("clipboard2-pulse-fill"),
-    style = "background-color: #3C4F5C!important; color: #FFFFFF!important",
+    style = "background-color: #853526!important; color: #FFFFFF!important",
     max_height = "150px"
   )
 )
 
-foot <- 
+foot <-
   tags$div(
-      style = "background-color: #FFFFFF; padding: 0px; text-align: center; bottom: 0; width: 100%;",
-      HTML(
-        "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://www.databricks.com/blog/databricks-and-posit-announce-new-integrations' target='_blank'>blog post</a> announcing the partnership."
-      )
+    style = "background-color: #FFFFFF; padding: 0px; text-align: center; bottom: 0; width: 100%;",
+    HTML(
+      "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://www.databricks.com/blog/databricks-and-posit-announce-new-integrations' target='_blank'>blog post</a> announcing the partnership."
     )
+  )
 
 cards <- list(
   card(
     full_screen = TRUE,
-    card_header("Condition count by unique patient"),
-    plotOutput(outputId = "condPlotDistinct")
+    card_header("Co-occurrence heatmap"),
+    plotlyOutput(outputId = "coHeatmap")
   ),
   card(
     full_screen = TRUE,
-    card_header("Condition count by unique patient, by comorbidity"),
-    plotOutput(outputId = "comorbidPlot")
+    card_header("Co-occurrence count"),
+    gt_output(outputId = "coTable")
   )
 )
 
 theme <- bslib::bs_theme(
-    fg = "#3C3E5C",
-    font_scale = NULL,
-    preset = "lumen",
-    bg = "#fff",
-    base_font = font_collection(
-      font_google("DM Sans"),
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      font_google("Roboto"),
-      "Helvetica Neue",
-      "Arial",
-      "sans-serif"
-    )
+  fg = "#002A44",
+  font_scale = NULL,
+  preset = "lumen",
+  bg = "#fff",
+  base_font = font_collection(
+    "Arial"
   )
-
+)
 
 ui <- page_navbar(
   theme = theme,
-  title = "Visit Diagnoses Browser",
+  title = "Visit diagnoses browser: Identify co-occuring diseases by population",
   fillable = "Dashboard",
   nav_panel(
     "Dashboard",
     layout_sidebar(
-    sidebar = sidebar(
-    width = 275
-    ,
-    p("Welcome!"),
-    markdown(
-      '<a href="https://shiny.posit.co/" target = "_blank">Shiny</a> is a framework for creating interactive web apps in either <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html" target = "_blank">R</a> or <a href="https://shiny.posit.co/py/" target = "_blank">Python</a>. This app taps into the power of Databricks by fetching data through ODBC, adding a layer of versatility and interactivity to the user experience.'
-    ),
-    numericInput(
-      inputId = "num_conditions",
-      label = "Select number of visit diagnoses to display:",
-      value = 5,
-      min = 2,
-      step = 1,
-      width = "100%"
-    ),
-    selectInput(
-      inputId = "select_comorbidity",
-      label = "Select comorbidity:",
-      choices = sort(comorbidities),
-      selected = "Chronic pain"
+      sidebar = sidebar(
+        width = 275,
+        p("Welcome!"),
+        p("Explore disease co-occurrences by population with our browser. Discover correlations, trends, and potential risk factors to better understand disease interactions."),
+        selectInput(
+          inputId = "select_race",
+          label = "Select population of interest:",
+          choices = c(sort(race_select), "All"),
+          selected = "All"
+        )
+      ),
+      layout_column_wrap(width = "250px",
+                         fill = FALSE,
+                         vbs[[1]], vbs[[2]], vbs[[3]]),
+      layout_columns(col_widths = c(7, 5),
+                     cards[[1]], cards[[2]]),
+      card_footer(foot)
     )
   ),
-    layout_column_wrap(width = "250px",
-                       fill = FALSE,
-                       vbs[[1]], vbs[[2]], vbs[[3]]),
-    layout_columns(cards[[1]], cards[[2]]),
-    card_footer(
-    foot
-  )
-  )),
-  nav_panel(title = "Data",
-            card(
-              markdown(
-                'This dashboard presents a simulated Electronic Health Record (EHR) dataset, generated by <a href="https://synthetichealth.github.io/synthea/" target = "_blank">Synthea</a>, representing the medical records of approximately 11,000 patients from Massachusetts.'
-              ),
-              markdown(
-                'The team at Databricks used PySpark, a framework for Apache Spark in Python, to ingest data from CSV files, clean patient Personally Identifiable Information (PII), and store the de-identified data into Delta Lake, a robust storage layer. With Delta tables, they created a database storing the patient records for subsequent data analysis.'
-              ),
-              markdown(
-                'More details regarding their methodology can be found in the blog post <a href="https://www.databricks.com/blog/2020/04/21/building-a-modern-clinical-health-data-lake-with-delta-lake.html" target = "_blank">Building a Modern Clinical Health Data Lake with Delta Lake</a> by Frank Austin Nothaft, Michael Ortega, and Amir Kermany.'
-              )
-            ),
-            card_footer(foot)),
+  nav_panel(
+    title = "Data",
+    card(
+      markdown(
+          '<a href="https://shiny.posit.co/" target = "_blank">Shiny</a> is a framework for creating interactive web apps in either <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html" target = "_blank">R</a> or <a href="https://shiny.posit.co/py/" target = "_blank">Python</a>.'
+        ),
+      markdown(
+        'This dashboard presents a simulated Electronic Health Record (EHR) dataset, generated by <a href="https://synthetichealth.github.io/synthea/" target = "_blank">Synthea</a>, representing the medical records of approximately 11,000 patients from Massachusetts.'
+      ),
+      markdown(
+        'The team at Databricks used PySpark, a framework for Apache Spark in Python, to ingest data from CSV files, clean patient Personally Identifiable Information (PII), and store the de-identified data into Delta Lake, a robust storage layer. With Delta tables, they created a database storing the patient records for subsequent data analysis.'
+      ),
+      markdown(
+        'More details regarding their methodology can be found in the blog post <a href="https://www.databricks.com/blog/2020/04/21/building-a-modern-clinical-health-data-lake-with-delta-lake.html" target = "_blank">Building a Modern Clinical Health Data Lake with Delta Lake</a> by Frank Austin Nothaft, Michael Ortega, and Amir Kermany.'
+      ),
+      markdown('This app taps into the power of Databricks by fetching the Delta tables through ODBC. Creating the dashboard in Shiny adds a layer of versatility and interactivity to the user experience.')
+    ),
+    card_footer(foot)
+  ),
   nav_spacer(),
   nav_item(
-    tags$a(icon("github"), href = "https://github.com/posit-marketing/healthcare-app", target = "_blank"),
+    tags$a(icon("github"), href = "https://github.com/posit-marketing/visit-diagnoses-browser", target = "_blank"),
     align = "right"
   )
 )
 
 server <- function(input, output) {
-  output$condPlotDistinct <- renderPlot({
-    selected_encounters_distinct <-
-      encounters |>
-      distinct(PATIENT, REASONDESCRIPTION) |>
-      group_by(REASONDESCRIPTION) |>
-      tally() |>
-      arrange(desc(n)) |>
-      slice(1:input$num_conditions)
-    
-    selected_encounters_distinct |>
-      ggplot(aes(x = reorder(REASONDESCRIPTION, n), y = n)) +
-      geom_bar(stat = "identity",
-               fill = "#363953",
-               color = "white") +
-      labs(x = "Reason Description", y = "Count") +
-      theme_minimal() +
-      theme(
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        text = element_text(size = 20,
-                            family = "dm-sans"),
-        plot.margin = margin(l = 22,
-                             b = 15)
-      ) +
-      coord_flip()
-  })
   
-  output$comorbidPlot <- renderPlot({
-    selected_comorbid <-
-      encounters |>
-      mutate(has_comorbid = case_when(REASONDESCRIPTION == input$select_comorbidity ~ 1L,
-                                      TRUE ~ NA)) |>
-      group_by(PATIENT) |>
-      mutate(has_comorbid = first(has_comorbid, na_rm = TRUE)) |>
-      ungroup() |>
-      mutate(has_comorbid = case_when(is.na(has_comorbid) ~ 0L,
-                                      TRUE ~ has_comorbid)) |>
-      group_by(REASONDESCRIPTION, has_comorbid) |>
-      tally() |>
-      mutate(sum_n = sum(n)) |>
-      arrange(desc(sum_n), desc(n))
-    
-    comorbid_order <- unique(selected_comorbid$REASONDESCRIPTION)
-    
-    selected_comorbid <-
-      selected_comorbid |>
-      mutate(REASONDESCRIPTION = factor(REASONDESCRIPTION, levels = comorbid_order)) |>
-      group_by(REASONDESCRIPTION) |>
-      mutate(group_id = cur_group_id()) |>
-      filter(group_id <= input$num_conditions)
-    
-    selected_comorbid |>
-      ggplot(aes(
-        x = reorder(REASONDESCRIPTION, n, sum),
-        y = n,
-        fill = forcats::fct_rev(as.factor(has_comorbid))
-      )) +
-      geom_bar(stat = "identity",
-               color = "white") +
-      labs(x = "Reason Description", y = "Count") +
-      theme_minimal() +
-      theme(
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        text = element_text(size = 20,
-                            family = "dm-sans"),
-        legend.position = "bottom",
-        legend.title = element_blank(),
-        legend.text = element_text(margin = margin(r = 30, unit = "pt")),
-        plot.margin = margin(t = 22)
-      ) +
-      scale_fill_manual(
-        labels = c("0" = paste0("No ", input$select_comorbidity),
-                   "1" = input$select_comorbidity),
-        values = c("0" = "#555982",
-                   "1" = "#DBC28F")
-      ) +
-      coord_flip()
-    
+  output$coHeatmap <- renderPlotly({
+    selected_comorbidities <- map(comorbidities, function(comorbidity) {
+      all_dat %>% 
+        { if(input$select_race != "All") dplyr::filter(., race %in% input$select_race) else .} |> 
+      dplyr::mutate(has_comorbid = case_when(reasondescription == {{comorbidity}} ~ 1L,
+                                           TRUE ~ NA)) |>
+    dplyr::group_by(patient) |>
+    dplyr::mutate(has_comorbid = first(has_comorbid, na_rm = TRUE)) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(has_comorbid = case_when(is.na(has_comorbid) ~ 0L,
+                                           TRUE ~ has_comorbid)) |>
+    dplyr::group_by(reasondescription, has_comorbid) |>
+    dplyr::tally() |>
+    dplyr::mutate(sum_n = sum(n)) |>
+    dplyr::arrange(desc(sum_n), desc(n)) |>
+    mutate(comorbid_condition = {{comorbidity}}) |>
+    filter(has_comorbid == 1) |>
+    ungroup()
+  
+      })
+
+selected_comorbidities_combined <-
+  bind_rows(selected_comorbidities) |>
+  filter(!reasondescription %in% comorbidities) |> 
+  slice_max(n = 20, order_by = n)
+
+ggplotly(
+  ggplot(
+    selected_comorbidities_combined,
+    aes(x = comorbid_condition, y = reasondescription, fill = n)
+  ) +
+    geom_tile(color = "white") +
+    scale_fill_gradient(low = "#EBE9EF", high = "#790A2F") +
+    theme_minimal() +
+    theme(
+      legend.position = "none",
+      panel.background = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      axis.text.x = element_text(angle = 25),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank()
+    )
+) |> 
+  plotly::layout(legend=list(x=0, 
+                                 xanchor='left',
+                                 yanchor='bottom',
+                                 orientation='h'))    
+  
+})
+  
+  output$coTable <- render_gt({
+    selected_comorbidities_combined |>
+      gt::gt() |>
+      cols_hide(columns = c(has_comorbid, sum_n)) |> 
+      gt::data_color(columns = n,
+                     method = "numeric",
+                     palette = "MetBrewer::Troy") |>
+      tab_style(
+        style = cell_text(whitespace = "pre-line"),
+        locations = cells_body(columns = reasondescription,)
+      ) |>
+      tab_style(
+        style = cell_text(whitespace = "pre-line"),
+        locations = cells_body(columns = comorbid_condition,)
+      ) |> 
+      opt_interactive(use_compact_mode = TRUE) |> 
+        cols_move(
+    columns = n,
+    after = comorbid_condition
+  ) |> 
+       cols_label(
+    reasondescription = md("**Condition 1**"),
+    comorbid_condition = md("**Condition 2**"),
+    n ~ md("**Count**")
+  )
+                    
   })
   
 }
