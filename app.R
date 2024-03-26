@@ -4,22 +4,22 @@ source("global.R")
 
 vbs <- list(
   value_box(
-    title = "Total number of visits",
-    value = "292,234",
+    title = "Number of visits",
+    value = scales::comma(n_visits),
     showcase = bs_icon("hospital-fill"),
     style = "background-color: #082D46!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
-    title = "Total number of patients",
-    value = "11,737",
+    title = "Number of patients",
+    value = scales::comma(n_patients),
     showcase = bs_icon("person-vcard-fill"),
     style = "background-color: #A45445!important; color: #FFFFFF!important",
     max_height = "150px"
   ),
   value_box(
-    title = "Total number of conditions",
-    value = "89",
+    title = "Number of conditions",
+    value = scales::comma(n_cond),
     showcase = bs_icon("clipboard2-pulse-fill"),
     style = "background-color: #853526!important; color: #FFFFFF!important",
     max_height = "150px"
@@ -30,19 +30,32 @@ foot <-
   tags$div(
     style = "background-color: #FFFFFF; padding: 0px; text-align: center; bottom: 0; width: 100%;",
     HTML(
-      "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://www.databricks.com/blog/databricks-and-posit-announce-new-integrations' target='_blank'>blog post</a> announcing the partnership."
+      "Powered by <a href='https://posit.co'><img src='https://www.rstudio.com/assets/img/posit-logo-fullcolor-TM.svg' alt='Posit Logo' style='width:55px;'></a> | Integrated with <a href='https://www.databricks.com'><img src='https://cdn.cookielaw.org/logos/29b588c5-ce77-40e2-8f89-41c4fa03c155/bc546ffe-d1b7-43af-9c0b-9fcf4b9f6e58/1e538bec-8640-4ae9-a0ca-44240b0c1a20/databricks-logo.png' alt='Databricks Logo' style='width:85px;'></a>. For more details, see our <a href='https://posit.co/blog/databricks-and-posit-announce-new-integrations/' target='_blank'>blog post</a> announcing the partnership."
     )
   )
 
 cards <- list(
+  card(full_screen = TRUE,
+       card_header(
+         "Co-occurrence heatmap",
+         tooltip(
+           bsicons::bs_icon("question-circle"),
+           "See the common conditions associated with hyperlipidemia, sinusitis, and anemia for the selected population.",
+           placement = "right"
+         )
+       ),
+       plotlyOutput(outputId = "coHeatmap")
+  ), 
   card(
     full_screen = TRUE,
-    card_header("Co-occurrence heatmap"),
-    plotlyOutput(outputId = "coHeatmap")
-  ),
-  card(
-    full_screen = TRUE,
-    card_header("Co-occurrence count"),
+    card_header(
+      "Co-occurrence table",
+      tooltip(
+        bsicons::bs_icon("question-circle"),
+        "See the most common co-occuring conditions for the selected population.",
+        placement = "right"
+      )
+    ),
     gt_output(outputId = "coTable")
   )
 )
@@ -52,14 +65,12 @@ theme <- bslib::bs_theme(
   font_scale = NULL,
   preset = "lumen",
   bg = "#fff",
-  base_font = font_collection(
-    "Arial"
-  )
+  base_font = font_collection("Arial")
 )
 
 ui <- page_navbar(
   theme = theme,
-  title = "Visit diagnoses browser: Identify co-occuring diseases by population",
+  title = "Visit diagnoses browser",
   fillable = "Dashboard",
   nav_panel(
     "Dashboard",
@@ -67,7 +78,9 @@ ui <- page_navbar(
       sidebar = sidebar(
         width = 275,
         p("Welcome!"),
-        p("Explore disease co-occurrences by population with our browser. Discover correlations, trends, and potential risk factors to better understand disease interactions."),
+        p(
+          "Explore disease co-occurrences by population with our browser. Discover correlations, trends, and potential risk factors to better understand disease interactions."
+        ),
         selectInput(
           inputId = "select_race",
           label = "Select population of interest:",
@@ -86,11 +99,12 @@ ui <- page_navbar(
   nav_panel(
     title = "Data",
     card(
+      card_header("About the browser"),
       markdown(
-          '<a href="https://shiny.posit.co/" target = "_blank">Shiny</a> is a framework for creating interactive web apps in either <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html" target = "_blank">R</a> or <a href="https://shiny.posit.co/py/" target = "_blank">Python</a>.'
-        ),
+        '<a href="https://shiny.posit.co/" target = "_blank">Shiny</a> is a framework for creating interactive web apps and dashboards in either <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html" target = "_blank">R</a> or <a href="https://shiny.posit.co/py/" target = "_blank">Python</a>.'
+      ),
       markdown(
-        'This dashboard presents a simulated Electronic Health Record (EHR) dataset, generated by <a href="https://synthetichealth.github.io/synthea/" target = "_blank">Synthea</a>, representing the medical records of approximately 11,000 patients from Massachusetts.'
+        'The Visit Diagnoses Browser visualizes a simulated Electronic Health Record (EHR) dataset, generated by <a href="https://synthetichealth.github.io/synthea/" target = "_blank">Synthea</a>, representing the medical records of approximately 11,000 patients from Massachusetts.'
       ),
       markdown(
         'The team at Databricks used PySpark, a framework for Apache Spark in Python, to ingest data from CSV files, clean patient Personally Identifiable Information (PII), and store the de-identified data into Delta Lake, a robust storage layer. With Delta tables, they created a database storing the patient records for subsequent data analysis.'
@@ -98,8 +112,13 @@ ui <- page_navbar(
       markdown(
         'More details regarding their methodology can be found in the blog post <a href="https://www.databricks.com/blog/2020/04/21/building-a-modern-clinical-health-data-lake-with-delta-lake.html" target = "_blank">Building a Modern Clinical Health Data Lake with Delta Lake</a> by Frank Austin Nothaft, Michael Ortega, and Amir Kermany.'
       ),
-      markdown('This app taps into the power of Databricks by fetching the Delta tables through ODBC. Creating the dashboard in Shiny adds a layer of versatility and interactivity to the user experience.')
-    ),
+      markdown(
+        'We tap into the power of Databricks by fetching the EHR data contained in the Delta tables through ODBC. Creating the browser with Shiny adds a layer of versatility and interactivity to the user experience.'
+      ),
+      markdown(
+        'Thanks to the power of [{bslib}](https://rstudio.github.io/bslib/), we can customize our Shiny app with layouts, tooltips, themes, and more.'
+      )
+    ), 
     card_footer(foot)
   ),
   nav_spacer(),
@@ -111,82 +130,102 @@ ui <- page_navbar(
 
 server <- function(input, output) {
   
-  output$coHeatmap <- renderPlotly({
+  condition_dat_reactive <- reactive({
+    req(input$select_race)
+    
     selected_comorbidities <- map(comorbidities, function(comorbidity) {
       all_dat %>% 
         { if(input$select_race != "All") dplyr::filter(., race %in% input$select_race) else .} |> 
-      dplyr::mutate(has_comorbid = case_when(reasondescription == {{comorbidity}} ~ 1L,
-                                           TRUE ~ NA)) |>
-    dplyr::group_by(patient) |>
-    dplyr::mutate(has_comorbid = first(has_comorbid, na_rm = TRUE)) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(has_comorbid = case_when(is.na(has_comorbid) ~ 0L,
-                                           TRUE ~ has_comorbid)) |>
-    dplyr::group_by(reasondescription, has_comorbid) |>
-    dplyr::tally() |>
-    dplyr::mutate(sum_n = sum(n)) |>
-    dplyr::arrange(desc(sum_n), desc(n)) |>
-    mutate(comorbid_condition = {{comorbidity}}) |>
-    filter(has_comorbid == 1) |>
-    ungroup()
+        dplyr::mutate(has_comorbid = case_when(reasondescription == {{comorbidity}} ~ 1L,
+                                               TRUE ~ NA)) |>
+        dplyr::group_by(patient) |>
+        dplyr::mutate(has_comorbid = dplyr::first(has_comorbid, na_rm = TRUE)) |>
+        dplyr::ungroup() |>
+        dplyr::mutate(has_comorbid = dplyr::case_when(is.na(has_comorbid) ~ 0L,
+                                                      TRUE ~ has_comorbid)) |>
+        dplyr::group_by(reasondescription, has_comorbid) |>
+        dplyr::tally() |>
+        dplyr::mutate(sum_n = sum(n)) |>
+        dplyr::arrange(desc(sum_n), desc(n)) |> 
+        dplyr::mutate(comorbid_condition = {{comorbidity}}) |>
+        dplyr::filter(has_comorbid == 1) |>
+        dplyr::ungroup()
+  })
+    
+    selected_comorbidities_combined <-
+      dplyr::bind_rows(selected_comorbidities) |>
+      dplyr::filter(!reasondescription %in% comorbidities) |>
+      dplyr::slice_max(n = 20, order_by = n)
+    
+  })
   
-      })
-
-selected_comorbidities_combined <-
-  bind_rows(selected_comorbidities) |>
-  filter(!reasondescription %in% comorbidities) |> 
-  slice_max(n = 20, order_by = n)
-
-ggplotly(
-  ggplot(
-    selected_comorbidities_combined,
-    aes(x = comorbid_condition, y = reasondescription, fill = n)
-  ) +
-    geom_tile(color = "white") +
-    scale_fill_gradient(low = "#EBE9EF", high = "#790A2F") +
-    theme_minimal() +
-    theme(
-      legend.position = "none",
-      panel.background = element_blank(),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      axis.text.x = element_text(angle = 25),
-      axis.title.x=element_blank(),
-      axis.title.y=element_blank()
-    )
-) |> 
-  plotly::layout(legend=list(x=0, 
-                                 xanchor='left',
-                                 yanchor='bottom',
-                                 orientation='h'))    
+  output$coHeatmap <- renderPlotly({
   
+    ggplotly(
+      ggplot(
+        condition_dat_reactive(),
+        aes(
+          x = comorbid_condition,
+          y = reasondescription,
+          fill = n,
+          text = paste(
+            "<b>Condition 1:</b>",
+            reasondescription,
+            "<br><b>Condition 2:</b>",
+            comorbid_condition,
+            "<br><b>Count:</b>",
+            n
+          )
+        ))+
+        geom_tile(color = "white") +
+        scale_fill_gradient(low = "#EBE9EF", high = "#D07062") +
+        scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+        theme_minimal() +
+        theme(
+          text = element_text(family = "Arial"),
+          legend.position = "none",
+          panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_blank(),
+            axis.title.x = element_blank(),
+          axis.title.y = element_blank()
+        ),
+      tooltip = "text"
+    ) |>
+      plotly::layout(legend = list(
+        x = 0,
+        xanchor = "left",
+        yanchor = "bottom",
+        orientation = "h"
+      ),
+      hoverlabel = list(bgcolor = "#002A44",
+                        align =  "left")) |> 
+      config(displayModeBar = FALSE)
 })
   
   output$coTable <- render_gt({
-    selected_comorbidities_combined |>
+    condition_dat_reactive() |>
       gt::gt() |>
-      cols_hide(columns = c(has_comorbid, sum_n)) |> 
+      gt::cols_hide(columns = c(has_comorbid, sum_n)) |>
       gt::data_color(columns = n,
                      method = "numeric",
                      palette = "MetBrewer::Troy") |>
-      tab_style(
+      gt::tab_style(
         style = cell_text(whitespace = "pre-line"),
-        locations = cells_body(columns = reasondescription,)
+        locations = cells_body(columns = reasondescription)
       ) |>
-      tab_style(
+      gt::tab_style(
         style = cell_text(whitespace = "pre-line"),
-        locations = cells_body(columns = comorbid_condition,)
-      ) |> 
-      opt_interactive(use_compact_mode = TRUE) |> 
-        cols_move(
-    columns = n,
-    after = comorbid_condition
-  ) |> 
-       cols_label(
-    reasondescription = md("**Condition 1**"),
-    comorbid_condition = md("**Condition 2**"),
-    n ~ md("**Count**")
-  )
+        locations = cells_body(columns = comorbid_condition)
+      ) |>
+      gt::opt_interactive(use_compact_mode = TRUE) |>
+      gt::cols_move(columns = n,
+                    after = comorbid_condition) |>
+      gt::cols_label(
+        reasondescription = md("**Condition 1**"),
+        comorbid_condition = md("**Condition 2**"),
+        n ~ md("**Count**")
+      )
                     
   })
   

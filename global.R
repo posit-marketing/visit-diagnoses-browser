@@ -5,20 +5,16 @@ library(bslib)
 library(bsicons)
 library(dplyr)
 library(ggplot2)
-library(showtext)
 library(purrr)
 library(janitor)
 library(plotly)
 library(gt)
-
-showtext::showtext_auto()
-sysfonts::font_add_google("DM Sans", "dm-sans")
+library(paletteer)
 
 # Data --------------------------------------------------------------------
 
 con <-
-  DBI::dbConnect(odbc::databricks(),
-                 httpPath = "/sql/1.0/warehouses/300bd24ba12adf8e")
+  DBI::dbConnect(odbc::databricks(), httpPath = "/sql/1.0/warehouses/300bd24ba12adf8e")
 
 encounters <-
   dplyr::tbl(con,
@@ -41,19 +37,20 @@ all_dat <-
   janitor::clean_names() |>
   dplyr::mutate(
     reasondescription = stringr::str_remove(reasondescription, "\\(disorder\\)"),
-    reasondescription = stringr::str_wrap(reasondescription, 25),
+    reasondescription = stringr::str_wrap(reasondescription, 30),
+    race = stringr::str_to_title(race),
     birthdate = as.Date(birthdate),
     age = lubridate::year(lubridate::as.period(
       lubridate::interval(start = birthdate, end = Sys.Date())
     ))
   )
 
+n_visits <- length(unique(all_dat$id))
+n_patients <- length(unique(all_dat$patient))
+n_cond <- length(unique(all_dat$reasondescription))
+
 race_select <-
-  c("white", "hispanic", "black", "asian", "native", "other")
+  c("White", "Hispanic", "Black", "Asian", "Native", "Other")
 
 comorbidities <-
-  c(
-    "Hyperlipidemia",
-    "Anemia",
-    "Sinusitis"
-  )
+  c("Hyperlipidemia", "Sinusitis", "Anemia")
