@@ -8,7 +8,7 @@ The team at Databricks used PySpark, a framework for Apache Spark in Python, to 
 
 More details regarding their methodology can be found in the blog post [Building a Modern Clinical Health Data Lake with Delta Lake](https://www.databricks.com/blog/2020/04/21/building-a-modern-clinical-health-data-lake-with-delta-lake.html) by Frank Austin Nothaft, Michael Ortega, and Amir Kermany.
 
-We pulled the data into [RStudio](https://posit.co/download/rstudio-desktop/) using the [odbc package](https://odbc.r-dbi.org/) and used it to create a [Shiny app](https://shiny.posit.co/) with [bslib](https://rstudio.github.io/bslib/index.html). More on working with databases on RStudio is available on the [Posit Solutions](https://solutions.posit.co/connections/db/) site.
+We pulled the data into [RStudio](https://posit.co/download/rstudio-desktop/) using the [odbc package](https://odbc.r-dbi.org/). More on working with databases on RStudio is available on the [Posit Solutions](https://solutions.posit.co/connections/db/) site. We used the data to create a [Shiny app](https://shiny.posit.co/) with [bslib](https://rstudio.github.io/bslib/index.html).The data is represented in visualizations made with [ggplot2](https://ggplot2.tidyverse.org/) and [Plotly](https://plotly.com/r/) and tables made with [gt](https://gt.rstudio.com/). 
 
 We tap into the power of Databricks by fetching the EHR data contained in the Delta tables through ODBC. Creating the browser in Shiny adds a layer of versatility and interactivity to the user experience.
 
