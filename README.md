@@ -12,7 +12,7 @@ We pulled the data into [RStudio](https://posit.co/download/rstudio-desktop/) us
 
 We tap into the power of Databricks by fetching the EHR data contained in the Delta tables through ODBC. Creating the browser in Shiny adds a layer of versatility and interactivity to the user experience.
 
-Thanks to the power of [{bslib}](https://rstudio.github.io/bslib/), we can customize our Shiny app with layouts, tooltips, themes, and more.
+Thanks to the power of bslib, we can customize our Shiny app with layouts, tooltips, themes, and more.
 
 ## Installation/Setup
 
